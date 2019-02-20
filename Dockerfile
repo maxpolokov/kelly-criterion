@@ -1,4 +1,4 @@
-FROM python:3.7-slim-stretch
+FROM python:3.7-slim-stretch AS build
 
 WORKDIR /app
 
@@ -12,5 +12,17 @@ RUN build_deps='gcc libc6-dev make' && \
 
 COPY . .
 RUN python setup.py install
+
+
+# Run tests
+FROM build AS test
+
+WORKDIR /app
+RUN  pip install -r test-requirements.txt && \
+     tox
+
+
+# Use the original app
+FROM build
 
 ENTRYPOINT ["kelly_criterion"]
